@@ -1,23 +1,37 @@
 #!/usr/bin/python
 
 # Wait for messages from RabbitMQ queue and sleep for received number of seconds
+# ToDo: get connection options from Salt config, add check for non correct payload
 
-import pika
 import time
+import pika
+from pika import exceptions
+from pika.adapters import twisted_connection
+from twisted.internet import defer, reactor, protocol,task
 
-connection = pika.BlockingConnection(pika.ConnectionParameters(host='192.168.56.100'))
-channel = connection.channel()
 
-def callback(ch, method, properties, body):
-    print(" [x] Payload received, sleeping for %r" % str(body))
-    time.sleep(float(body))
+@defer.inlineCallbacks
+def run(connection):
 
-channel.basic_consume(callback, queue='central', no_ack=True)
+    channel = yield connection.channel()
+    yield channel.basic_qos(prefetch_count=1)
+    queue_object, consumer_tag = yield channel.basic_consume(queue='central',no_ack=False)
+    l = task.LoopingCall(read, queue_object)
+    l.start(0.01)
 
+@defer.inlineCallbacks
+def read(queue_object):
+
+    ch,method,properties,body = yield queue_object.get()
+    if body:
+        print(" [x] Payload received, sleeping for %r" % str(body))
+        time.sleep(float(body))
+    yield ch.basic_ack(delivery_tag=method.delivery_tag)
+
+parameters = pika.ConnectionParameters()
+cc = protocol.ClientCreator(reactor, twisted_connection.TwistedProtocolConnection, parameters)
+d = cc.connectTCP('192.168.56.100', 5672)
+d.addCallback(lambda protocol: protocol.ready)
+d.addCallback(run)
 print(" [*] Waiting for messages. To exit press CTRL+C")
-
-try:
-    channel.start_consuming()
-except KeyboardInterrupt:
-    channel.stop_consuming()
-connection.close()
+reactor.run()

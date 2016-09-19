@@ -70,7 +70,7 @@
     </templates>
     <triggers>
         <trigger>
-            <expression>{Template RabbitMQ Queue Depth:rabbitmq_queue.last(0)}&gt;10</expression>
+            <expression>{Template RabbitMQ Queue Depth:rabbitmq_queue.last(0)}>=10</expression>
             <name>RabbitMQ Queue Depth (RabbitMQ Queue Depth Exceeded Threshold {HOSTNAME})</name>
             <url/>
             <status>0</status>

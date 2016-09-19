@@ -2,14 +2,24 @@
 
 # Clog RabbitMQ queue to make an alarm on Zabbix server
 # Default threshold on Zabbix server is set to 10 messages
-# We will try to clog queue with 15 messages where consumers are trying to make queue empty
+# Will keep queue filled with 11 messages for 60 seconds, perhaps when consumers making queue empty
 
 let NUM=0
 let PAYLOAD=1
-# exit if 50 attempts to clog the queue are unsuccessful
-while [ $NUM -le 15 ] && [ $PAYLOAD -le 50 ]; do
+let TIMER=0
+let PERCENT=0
+echo -ne "Trying to clog the queue for 60 seconds...\r"
+while [ $TIMER -lt 60 ]; do
     NUM=`sudo rabbitmqctl list_queues name messages_ready | grep 'central' |  awk '{ print $2 }'`
-	/usr/local/bin/app-server $PAYLOAD
-    # increase sleep time for consumers with each iteration
-    let PAYLOAD=$PAYLOAD+1
+    if [ $NUM -le 11 ]; then
+        /usr/local/bin/app-server $PAYLOAD > /dev/null
+        let PAYLOAD=$PAYLOAD+1
+    else
+        if [ $PAYLOAD -gt 1 ]; then let PAYLOAD=$PAYLOAD-1; fi
+        let TIMER=$TIMER+1
+        let PERCENT=$((TIMER*100/60))
+        echo -ne "Trying to clog the queue for 60 seconds - ${PERCENT}%\033[0K  \r"
+        sleep 1
+    fi
 done
+echo ""

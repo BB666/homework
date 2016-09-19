@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # Register host with Zabbix server with needed templates and groups
+# ToDo: add templates and gruups by name, rewrite code with Python pyzabbix
 
 ZABBIX_USER=`grep -i 'zabbix.user: ' /etc/salt/minion | cut -d ' ' -f 2`
 ZABBIX_PASS=`grep -i 'zabbix.password: ' /etc/salt/minion | cut -d ' ' -f 2`

@@ -12,4 +12,4 @@ base:
   'worker*':
     - rabbit-client
     - zabbix-agent
-    - pika
+    - python-packages

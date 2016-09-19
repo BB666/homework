@@ -1,1 +1,1 @@
-%zabbix ALL=(ALL) NOPASSWD: ALL
+%zabbix ALL = (root) NOPASSWD: /sbin/rabbitmqctl

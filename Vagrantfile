@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 ### Number of WORKER boxes to deploy, from 0 up to 150
-WORKERS_COUNT = 2
+WORKERS_COUNT = 1
 
 ### Check for required plugins
 required_plugins = %w( virtualbox vagrant-vbguest )
@@ -46,22 +46,21 @@ Vagrant.configure(2) do |config|
         main.vm.provision :file, source: "usr/src/Send.java", destination: "/tmp/Send.java"
 
         # Zabbix configuration files
-        main.vm.provision :file, source: "etc/zabbix/", destination: "/tmp/"
-        main.vm.provision :file, source: "etc/sudoers.d/zabbix", destination: "/tmp/"
+        main.vm.provision :file, source: "etc/zabbix/", destination: "/tmp/zabbix/"
+        main.vm.provision :file, source: "etc/sudoers.d/zabbix", destination: "/tmp/zabbix_sudoers"
 
-        # additional tools for Zabbix and to clog RabbitMQ queue
-        main.vm.provision :file, source: "usr/local/bin/", destination: "/tmp/"
+        # Additional tools for Zabbix and to clog RabbitMQ queue
+        main.vm.provision :file, source: "usr/local/bin/", destination: "/tmp/apps/"
 
         main.vm.provision "shell", inline: <<-SHELL
             setenforce 0
             if [ ! -d /etc/rabbitmq ]; then mkdir /etc/rabbitmq; fi; mv -f /tmp/rabbitmq.config /etc/rabbitmq/rabbitmq.config
-            mv -f /tmp/bin/* /usr/local/bin/; chmod 755 /usr/local/bin/*
+            mv -f /tmp/apps/* /usr/local/bin/; chmod 755 /usr/local/bin/*
             if [ ! -d /etc/zabbix/web ]; then mkdir -p /etc/zabbix/web; fi; mv -f /tmp/zabbix/web/* /etc/zabbix/web/
             if [ ! -d /etc/zabbix/zabbix_agentd.d ]; then mkdir -p /etc/zabbix/zabbix_agentd.d; fi; mv -f /tmp/zabbix/zabbix_agentd.d/* /etc/zabbix/zabbix_agentd.d/
             mv -f /tmp/zabbix/*.template.* /etc/zabbix/
             mv -f /tmp/Send.java /usr/src/Send.java
-            mv -f /tmp/zabbix /etc/sudoers.d/zabbix; chown root:root /etc/sudoers.d/zabbix
-            # yum update -y
+            mv -f /tmp/zabbix_sudoers /etc/sudoers.d/zabbix; chown root:root /etc/sudoers.d/zabbix; chmod 440 /etc/sudoers.d/zabbix
         SHELL
 
         main.vm.synced_folder "salt/roots/salt", "/srv/salt/"
@@ -69,11 +68,9 @@ Vagrant.configure(2) do |config|
             salt.masterless = true
             salt.minion_config = "salt/minion"
             salt.run_highstate = true
-            # for verbose Salt output ucomment 3 lines below
+            # for verbose Salt output ucomment 2 lines below
             # salt.verbose = true
             # salt.log_level = "info"
-            # salt.colorize = true
-
         end
     end
 
@@ -104,17 +101,16 @@ Vagrant.configure(2) do |config|
                 v.linked_clone = true
             end
 
-            # application to deploy on WORKERS
+            # Application to deploy on WORKERS
             main.vm.provision :file, source: "usr/local/bin/app-client", destination: "/tmp/app-client"
 
-            # tool for host autoregistration with Zabbix server
+            # Script for host autoregistration with Zabbix server
             main.vm.provision :file, source: "usr/local/bin/zabbix-create-host", destination: "/tmp/zabbix-create-host"
 
             main.vm.provision "shell", inline: <<-SHELL
                 setenforce 0
                 mv -f /tmp/app-client /usr/local/bin/app-client; chmod 755 /usr/local/bin/app-client
                 mv -f /tmp/zabbix-create-host /usr/local/bin/zabbix-create-host; chmod 755 /usr/local/bin/zabbix-create-host
-                # yum update -y
             SHELL
 
             main.vm.synced_folder "salt/roots/salt", "/srv/salt/"
@@ -122,10 +118,9 @@ Vagrant.configure(2) do |config|
                 salt.masterless = true
                 salt.minion_config = "salt/minion"
                 salt.run_highstate = true
-                # for verbose Salt output ucomment 3 lines below
+                # for verbose Salt output ucomment 2 lines below
                 # salt.verbose = true
                 # salt.log_level = "info"
-                # salt.colorize = true
             end
 		end
     end
