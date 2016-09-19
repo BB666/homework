@@ -27,20 +27,23 @@ Fast and reliable internet connection highly recommended.
 Start VirtualBox and configure two network adapters _NAT_ and _Host only_. _Host only_ adapter should be able to provide DHCP addresses for guests with IP range 192.168.56.100 to 192.168.56.250.
 
 Number of initially deployed workers defined in `Vagrantfile` in variable WORKERS_COUNT. It can be from 0 and up to 150, depends on your host resources. The default value is 1:
+```
     WORKERS_COUNT = 1
+```
 Alternatively you can start with default value and adjust number of WORKERS later, followed by `vagrant up` command to start extra worker machine.
 
 Zabbix credentials and database password stored in `/salt/minion` file. The default values are as follows:
+```
     zabbix.user: Admin
     zabbix.password: zabbix
     zabbix.server: 192.168.56.100
     zabbix.url: http://192.168.56.100/zabbix/api_jsonrpc.php
     zabbix.db_password: password 
-
+```
 ### Usage:
 Enter project directory and run `vagrant up` command. If you start it for the first time Vagrant will download and install additional plugins automatically:
 ```
-homework>vagrant up
+homework> vagrant up
 Installing the 'virtualbox' plugin. This can take a few minutes...
 Installed the plugin 'virtualbox (0.8.6)'!
 Installing the 'vagrant-vbguest' plugin. This can take a few minutes...
