@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# Register host with Zabbix server with needed templates and groups
+
+ZABBIX_USER=`grep -i 'zabbix.user: ' /etc/salt/minion | cut -d ' ' -f 2`
+ZABBIX_PASS=`grep -i 'zabbix.password: ' /etc/salt/minion | cut -d ' ' -f 2`
+ZABBIX_SERVER=`grep -i 'zabbix.server: ' /etc/salt/minion | cut -d ' ' -f 2`
+ZABBIX_URL=`grep -i 'zabbix.url: ' /etc/salt/minion | cut -d ' ' -f 2`
+HOST=`hostname --short`
+IP=`hostname -I | cut -d" " -f2`
+
+# Authenticate first
+auth() {
+    curl -s -X POST -H 'Content-Type: application/json-rpc' -d "{\"jsonrpc\": \"2.0\",\"method\": \"user.login\",\"params\": {\"user\": \"$ZABBIX_USER\",\"password\": \"$ZABBIX_PASS\"},\"id\": 0}" $ZABBIX_URL | cut -d'"' -f8
+}
+
+# Create Host
+create() {
+    if [ "$IP" == "$ZABBIX_SERVER" ]; then
+        TEMPLATES=",{\"templateid\":10047}"
+    fi
+    DATA="{\"jsonrpc\":\"2.0\",\"method\":\"host.create\",\"params\":{\"host\":\"$HOST\",\"interfaces\":[{\"type\":1,\"main\":1,\"useip\":1,\"ip\":\"$IP\",\"dns\":\"\",\"port\":10050}],\"groups\":[{\"groupid\":2}],\"templates\":[{\"templateid\":10001}$TEMPLATES]},\"auth\":\"$AUTH_KEY\",\"id\":0}" 
+    curl -s -X POST -H 'Content-Type: application/json-rpc' -d $DATA $ZABBIX_URL
+}
+
+AUTH_KEY=$(auth)
+RESULT=$(create)
+echo $RESULT | grep -q "hostids"
+CODE=$?
+if [ $CODE -ne 0 ]; then
+    echo $RESULT | grep -q "already exists"
+    if [ $? -eq 0 ]; then exit 0; fi
+	echo $RESULT | grep -Po '"message":.*?[^\\]",'
+	echo $RESULT | grep -Po '"data":.*?[^\\]"' 
+fi
+exit $CODE

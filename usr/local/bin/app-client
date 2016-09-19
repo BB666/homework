@@ -1,0 +1,23 @@
+#!/usr/bin/python
+
+# Wait for messages from RabbitMQ queue and sleep for received number of seconds
+
+import pika
+import time
+
+connection = pika.BlockingConnection(pika.ConnectionParameters(host='192.168.56.100'))
+channel = connection.channel()
+
+def callback(ch, method, properties, body):
+    print(" [x] Payload received, sleeping for %r" % str(body))
+    time.sleep(float(body))
+
+channel.basic_consume(callback, queue='central', no_ack=True)
+
+print(" [*] Waiting for messages. To exit press CTRL+C")
+
+try:
+    channel.start_consuming()
+except KeyboardInterrupt:
+    channel.stop_consuming()
+connection.close()

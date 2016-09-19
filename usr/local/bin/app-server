@@ -1,0 +1,7 @@
+#!/usr/bin/sh
+
+# Wrapper to start Java application for sending a message to RabbitMQ queue
+# Requires single parameter, usually a number to send to RabbitMQ queue
+
+cd /usr/src
+java -cp .:commons-io-1.2.jar:commons-cli-1.1.jar:rabbitmq-client.jar Send $1

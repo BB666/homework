@@ -1,0 +1,108 @@
+#!/usr/bin/env python
+
+# Import xml templates to Zabbix server and link host with template
+
+from pyzabbix import ZabbixAPI, ZabbixAPIException
+import glob
+
+templates_path = '/etc/zabbix/*.template.xml'
+template_to_link = "Template RabbitMQ Queue Depth"
+host_to_link = "central"
+
+# Get connection information from /etc/salt/minion
+credentials = {}
+for line in open('/etc/salt/minion','r'):
+    if line.startswith('zabbix.'):
+         credentials.update([line.strip().split(': ')])
+
+zabbix_url = 'http://' + credentials['zabbix.server'] + '/zabbix'
+
+zapi = ZabbixAPI(zabbix_url)
+zapi.login(credentials['zabbix.user'], credentials['zabbix.password'])
+
+rules = {
+    'applications': {
+        'createMissing': 'true',
+        'updateExisting': 'true'
+    },
+    'discoveryRules': {
+        'createMissing': 'true',
+        'updateExisting': 'true'
+    },
+    'graphs': {
+        'createMissing': 'true',
+        'updateExisting': 'true'
+    },
+    'groups': {
+        'createMissing': 'true'
+    },
+    'hosts': {
+        'createMissing': 'true',
+        'updateExisting': 'true'
+    },
+    'images': {
+        'createMissing': 'true',
+        'updateExisting': 'true'
+    },
+    'items': {
+        'createMissing': 'true',
+        'updateExisting': 'true'
+    },
+    'maps': {
+        'createMissing': 'true',
+        'updateExisting': 'true'
+    },
+    'screens': {
+        'createMissing': 'true',
+        'updateExisting': 'true'
+    },
+    'templateLinkage': {
+        'createMissing': 'true',
+        'updateExisting': 'true'
+    },
+    'templates': {
+        'createMissing': 'true',
+        'updateExisting': 'true'
+    },
+    'templateScreens': {
+        'createMissing': 'true',
+        'updateExisting': 'true'
+    },
+    'triggers': {
+        'createMissing': 'true',
+        'updateExisting': 'true'
+    },
+}
+
+# Import templates
+files = glob.glob(templates_path)
+for file in files:
+    with open(file, 'r') as f:
+        tmplate = f.read()
+        try:
+            zapi.confimport('xml', tmplate, rules)
+        except ZabbixAPIException as e:
+            print(e)
+
+# Link host with template
+templates = zapi.template.get(filter={"host": template_to_link})
+if templates:
+    template_id = templates[0]["templateid"]
+
+    hosts = zapi.host.get(filter={"host": host_to_link})
+    if hosts:
+        host_id = hosts[0]["hostid"]
+
+        try:
+            item = zapi.template.massadd(
+                hosts = [{"hostid": host_id}],
+                templates = [{"templateid": template_id}]
+            )
+        except ZabbixAPIException as e:
+            print(e)
+            sys.exit()
+        print("{0} linked with host {1}".format(template_to_link,host_to_link))
+    else:
+        print("Host {0} not found".format(host_to_link))
+else:
+    print("{0} not found".format(template_to_link))
