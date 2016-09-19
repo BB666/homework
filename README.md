@@ -2,28 +2,28 @@ homework
 ========
 Project to deploy virtual machines with Vagrant and customize them with SaltStack.
 
-#### Source: 
+### Source: 
 https://github.com/bb666/homework
 
-#### What is inside?
+### What is inside?
  - Vagrantfile, which deploys one CENTRAL box and up to 150 WORKERS
  - Salt masterless minion configuration files
  - Applications and scripts to import Zabbix templates, autoregister Zabbix agents and to clog RabbitMQ queue to trigger Zabbix alarm
 
-#### Requirements:
+### Requirements:
 Project has been successfully tested on Windows host, perhaps will work on Linux machine as well. Following software required:
  - Vagrant (tested with 1.8.5)
  - VirtualBox (tested with 5.1.6)
  - ssh, rsync (tested from CygWin 2.876)
 Fast and reliable internet connection highly recommended.
 
-#### Installation:
+### Installation:
 1. Download and install Oracle VirtualBox for your operating system. Package can be obtained from official download page https://www.virtualbox.org/wiki/Downloads
 2. Download and install Vagrant https://www.vagrantup.com/downloads.html (see notes below)
 3. Download project archive from GitHub https://github.com/BB666/homework/archive/master.zip or clone it with git: `git clone https://github.com/BB666/homework.git`
 4. You may optionally change default configuration with your values and credentials (see below)
 
-#### Configuration:
+### Configuration:
 Start VirtualBox and configure two network adapters _NAT_ and _Host only_. _Host only_ adapter should be able to provide DHCP addresses for guests with IP range 192.168.56.100 to 192.168.56.250.
 
 Number of initially deployed workers defined in `Vagrantfile` in variable WORKERS_COUNT. It can be from 0 and up to 150, depends on your host resources. The default value is 1:
@@ -37,7 +37,7 @@ Zabbix credentials and database password stored in `/salt/minion` file. The defa
     zabbix.url: http://192.168.56.100/zabbix/api_jsonrpc.php
     zabbix.db_password: password 
 
-#### Usage:
+### Usage:
 Enter project directory and run `vagrant up` command. If you start it for the first time Vagrant will download and install additional plugins automatically:
 ```
 homework>vagrant up
@@ -84,7 +84,7 @@ On each worker available Python script `/usr/local/bin/app-client`, which can be
 
 For stress test you can deploy abnormally high number of workers and start `/usr/local/bin/app-client` on each of them to consume messages. Then run `/usr/local/bin/clog` on central and check queue depth, queue alarm and health status of each machine with Zabbix dashboard. Number of workers can be adjusted according to your host CPU and memory resources. 
 
-#### Notes:
+### Notes:
 * RabbitMQ Web Management console available at http://192.168.56.100:15672 with login/password: `guest/guest`
 * Zabbix Web Management available at http://192.168.56.100/zabbix with login/password: `Admin/zabbix`
 * Known bug with authentication failure for Vagrant 1.8.5 (incorrect permissions for guest authorized_keys file), more info https://github.com/mitchellh/vagrant/issues/7610
