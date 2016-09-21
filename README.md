@@ -11,11 +11,10 @@ https://github.com/bb666/homework
  - Applications and scripts to import Zabbix templates, autoregister Zabbix agents and to clog RabbitMQ queue to trigger Zabbix alarm
 
 ### Requirements:
-Project has been successfully tested on Windows host, perhaps will work on Linux machine as well. Following software required:
+Project has been successfully tested on Windows host, perhaps will work on Linux machine as well. Internet connection and following software are required:
  - Vagrant (tested with 1.8.5)
  - VirtualBox (tested with 5.1.6)
  - ssh, rsync (tested from CygWin 2.876)
-Fast and reliable internet connection highly recommended.
 
 ### Installation:
 1. Download and install Oracle VirtualBox for your operating system. Package can be obtained from official download page https://www.virtualbox.org/wiki/Downloads
@@ -38,7 +37,8 @@ Zabbix credentials and database password stored in `/salt/minion` file. The defa
     zabbix.password: zabbix
     zabbix.server: 192.168.56.100
     zabbix.url: http://192.168.56.100/zabbix/api_jsonrpc.php
-    zabbix.db_password: password 
+    zabbix.db_user: zabbix
+    zabbix.db_password: password
 ```
 ### Usage:
 Enter project directory and run `vagrant up` command. If you start it for the first time Vagrant will download and install additional plugins automatically:

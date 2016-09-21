@@ -10,7 +10,7 @@ rabbit-java-client-arc:
     archive.extracted:
         - name: /usr/src/
         - source: http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.6.5/rabbitmq-java-client-bin-3.6.5.tar.gz
-#       - source: https://github.com/rabbitmq/rabbitmq-server/releases/download/rabbitmq_v3_6_5/rabbitmq-java-client-bin-3.6.5.tar.gz
+        - source: https://github.com/rabbitmq/rabbitmq-server/releases/download/rabbitmq_v3_6_5/rabbitmq-java-client-bin-3.6.5.tar.gz
         - source_hash: md5=84811184fddff4bd1f875a369dbe652f
         - archive_format: tar
         - tar_options: z

@@ -56,7 +56,7 @@ Vagrant.configure(2) do |config|
             setenforce 0
             if [ ! -d /etc/rabbitmq ]; then mkdir /etc/rabbitmq; fi; mv -f /tmp/rabbitmq.config /etc/rabbitmq/rabbitmq.config
             mv -f /tmp/apps/* /usr/local/bin/; chmod 755 /usr/local/bin/*
-            if [ ! -d /etc/zabbix/web ]; then mkdir -p /etc/zabbix/web; fi; mv -f /tmp/zabbix/web/* /etc/zabbix/web/
+            # if [ ! -d /etc/zabbix/web ]; then mkdir -p /etc/zabbix/web; fi
             if [ ! -d /etc/zabbix/zabbix_agentd.d ]; then mkdir -p /etc/zabbix/zabbix_agentd.d; fi; mv -f /tmp/zabbix/zabbix_agentd.d/* /etc/zabbix/zabbix_agentd.d/
             mv -f /tmp/zabbix/*.template.* /etc/zabbix/
             mv -f /tmp/Send.java /usr/src/Send.java

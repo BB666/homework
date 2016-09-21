@@ -2,7 +2,7 @@ install-rabbitmqadmin:
   file.managed:
     - name: /usr/local/sbin/rabbitmqadmin
     - source: http://127.0.0.1:15672/cli/rabbitmqadmin
-#   - source: https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/rabbitmq_v3_6_5/bin/rabbitmqadmin
+    - source: https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/rabbitmq_v3_6_5/bin/rabbitmqadmin
     - skip_verify: True
     - user: root
     - group: root

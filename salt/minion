@@ -2,6 +2,7 @@ zabbix.server: 192.168.56.100
 zabbix.user: Admin
 zabbix.password: zabbix
 zabbix.url: http://192.168.56.100/zabbix/api_jsonrpc.php
+zabbix.db_user: zabbix
 zabbix.db_password: password
 file_client: local
 file_roots:
