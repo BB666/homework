@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 ### Number of WORKER boxes to deploy, from 0 up to 150
-WORKERS_COUNT = 0
+WORKERS_COUNT = 1
 
 ### Check for required plugins
 required_plugins = %w( virtualbox vagrant-vbguest )

@@ -18,7 +18,7 @@ zabbix-server:
         - names:
             - sed -i '/^DBUser=/s/^DBUser=.*/DBUser={{ opts['zabbix.db_user'] }}/' /etc/zabbix/zabbix_server.conf
             - sed -i '/^# DBPassword=/a DBPassword={{ opts['zabbix.db_password'] }}' /etc/zabbix/zabbix_server.conf
-            - sed -i '/^# php_value date.timezone /s/^# //' /etc/httpd/conf.d/zabbix.conf; systemctl restart httpd
+            - sed -i '/# php_value date.timezone /s/# //' /etc/httpd/conf.d/zabbix.conf; systemctl restart httpd
         - require:
             - pkg: zabbix-server
             - cmd: db-update
@@ -90,6 +90,6 @@ zabbix-repo:
 zabbix-delete-host:
     cmd.run:
         - name: salt-call zabbix.host_delete 10084 
-{#        - onlyif: salt-call zabbix.host_exists host='Zabbix server' #}
+{#      - onlyif: salt-call zabbix.host_exists host='Zabbix server' #}
         - require:
             - service: zabbix-server
