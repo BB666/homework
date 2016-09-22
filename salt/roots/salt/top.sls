@@ -6,8 +6,10 @@ base:
     - rabbit-client
     - app-server
     - zabbix-server
+    - python-pyzabbix
     - zabbix-agent
     - zabbix-templates
   'worker*':
-    - python-packages
+    - python-pyzabbix
     - zabbix-agent
+    - python-packages

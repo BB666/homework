@@ -1,7 +1,3 @@
-python-pip:
-    pkg.installed:
-        - name: python-pip
-
 python-devel:
     pkg.installed:
         - name: python-devel
@@ -12,6 +8,5 @@ pika:
             - pip install pika
             - pip install twisted
         - require:
-            - pkg: python-pip
             - pkg: python-devel
- 
+            - pkg: python-pip

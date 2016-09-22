@@ -1,37 +1,54 @@
-#!/bin/sh
+#!/usr/bin/env python
 
-# Register host with Zabbix server with needed templates and groups
-# ToDo: add templates and gruups by name, rewrite code with Python pyzabbix
+# Create host on Zabbix server and link it with template(s)
 
-ZABBIX_USER=`grep -i 'zabbix.user: ' /etc/salt/minion | cut -d ' ' -f 2`
-ZABBIX_PASS=`grep -i 'zabbix.password: ' /etc/salt/minion | cut -d ' ' -f 2`
-ZABBIX_SERVER=`grep -i 'zabbix.server: ' /etc/salt/minion | cut -d ' ' -f 2`
-ZABBIX_URL=`grep -i 'zabbix.url: ' /etc/salt/minion | cut -d ' ' -f 2`
-HOST=`hostname --short`
-IP=`hostname -I | cut -d" " -f2`
+import socket
+from pyzabbix import ZabbixAPI, ZabbixAPIException
 
-# Authenticate first
-auth() {
-    curl -s -X POST -H 'Content-Type: application/json-rpc' -d "{\"jsonrpc\": \"2.0\",\"method\": \"user.login\",\"params\": {\"user\": \"$ZABBIX_USER\",\"password\": \"$ZABBIX_PASS\"},\"id\": 0}" $ZABBIX_URL | cut -d'"' -f8
-}
+templates_to_add = [ "Template OS Linux" ]
+templates_to_add_server = [ "Template RabbitMQ Queue Depth", "Template App Zabbix Server" ]
 
-# Create Host
-create() {
-    if [ "$IP" == "$ZABBIX_SERVER" ]; then
-        TEMPLATES=",{\"templateid\":10047}"
-    fi
-    DATA="{\"jsonrpc\":\"2.0\",\"method\":\"host.create\",\"params\":{\"host\":\"$HOST\",\"interfaces\":[{\"type\":1,\"main\":1,\"useip\":1,\"ip\":\"$IP\",\"dns\":\"\",\"port\":10050}],\"groups\":[{\"groupid\":2}],\"templates\":[{\"templateid\":10001}$TEMPLATES]},\"auth\":\"$AUTH_KEY\",\"id\":0}" 
-    curl -s -X POST -H 'Content-Type: application/json-rpc' -d $DATA $ZABBIX_URL
-}
+# Get connection information from /etc/salt/minion
+credentials = {}
+for line in open('/etc/salt/minion','r'):
+    if line.startswith('zabbix.'):
+        credentials.update([line.strip().split(': ')])
 
-AUTH_KEY=$(auth)
-RESULT=$(create)
-echo $RESULT | grep -q "hostids"
-CODE=$?
-if [ $CODE -ne 0 ]; then
-    echo $RESULT | grep -q "already exists"
-    if [ $? -eq 0 ]; then exit 0; fi
-	echo $RESULT | grep -Po '"message":.*?[^\\]",'
-	echo $RESULT | grep -Po '"data":.*?[^\\]"' 
-fi
-exit $CODE
+zabbix_url = 'http://' + credentials['zabbix.server'] + '/zabbix'
+
+zapi = ZabbixAPI(zabbix_url)
+zapi.login(credentials['zabbix.user'], credentials['zabbix.password'])
+
+host_to_add = socket.gethostname()
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect((credentials['zabbix.server'], 0))
+ip = s.getsockname()[0]
+
+if ip == credentials['zabbix.server']:
+        templates_to_add.extend(templates_to_add_server)
+
+templates_ = []
+_templates = zapi.template.get(filter={"host": templates_to_add})
+if _templates:
+    for template in _templates:
+        templates_.append({"templateid": template["templateid"]})
+
+    _host = zapi.host.get(filter={"host": host_to_add})
+    if not _host:
+        try:
+            item = zapi.host.create(
+                host = host_to_add,
+                groups = [{"groupid": 2}],
+                interfaces = [{"type": 1, "main": 1, "useip": 1, "ip": "%s" % ip, "dns": "", "port": 10050}],
+                templates = templates_
+            )
+        except ZabbixAPIException as e:
+                print(e)
+                exit(1)
+        print("Host %s has been created" % host_to_add)
+    else:
+        print("Host %s already exists" % host_to_add)
+        exit(0)
+else:
+    print("Templates no found in DB")
+    exit(1)

@@ -67,7 +67,7 @@ Vagrant.configure(2) do |config|
             salt.masterless = true
             salt.minion_config = "salt/minion"
             salt.run_highstate = true
-            # for verbose Salt output ucomment 2 lines below
+            # for verbose Salt output uncomment 2 lines below
             # salt.verbose = true
             # salt.log_level = "info"
         end
@@ -117,7 +117,7 @@ Vagrant.configure(2) do |config|
                 salt.masterless = true
                 salt.minion_config = "salt/minion"
                 salt.run_highstate = true
-                # for verbose Salt output ucomment 2 lines below
+                # for verbose Salt output uncomment 2 lines below
                 # salt.verbose = true
                 # salt.log_level = "info"
             end
