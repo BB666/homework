@@ -102,11 +102,11 @@ if templates:
             )
         except ZabbixAPIException as e:
             print(e)
-            sys.exit(1)
+            exit(1)
         print("{0} linked with host {1}".format(template_to_link,host_to_link))
     else:
         print("Host {0} not found".format(host_to_link))
-        sys.exit(1)
+        exit(1)
 else:
     print("{0} not found".format(template_to_link))
-    sys.exit(1)
+    exit(1)

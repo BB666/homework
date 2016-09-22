@@ -16,14 +16,37 @@ zabbix-server:
             - file: /etc/zabbix/web/zabbix.conf.php
     cmd.run:
         - names:
-            - sed -i '/# DBPassword=/a DBPassword={{ opts['zabbix.db_password'] }}' /etc/zabbix/zabbix_server.conf
-            - sed -i '/# php_value date.timezone /s/# //' /etc/httpd/conf.d/zabbix.conf; systemctl restart httpd
+            - sed -i '/^DBUser=/s/^DBUser=.*/DBUser={{ opts['zabbix.db_user'] }}/' /etc/zabbix/zabbix_server.conf
+            - sed -i '/^# DBPassword=/a DBPassword={{ opts['zabbix.db_password'] }}' /etc/zabbix/zabbix_server.conf
+            - sed -i '/^# php_value date.timezone /s/^# //' /etc/httpd/conf.d/zabbix.conf; systemctl restart httpd
+        - require:
+            - pkg: zabbix-server
+            - cmd: db-update
+
+db-update:
+    cmd.run:
+        - names:
+            - mysql -u root zabbix -e "update users set alias=\"{{ opts['zabbix.user'] }}\",passwd=MD5(\"{{ opts['zabbix.password'] }}\") where userid=1"
+        - require:
+            - cmd: db-import
+
+db-import:
+    cmd.run:
+        - names:
             - gzip -d /usr/share/doc/zabbix-server-mysql-*/create.sql.gz; mysql -u root zabbix < /usr/share/doc/zabbix-server-mysql-*/create.sql
-            - mysql -u root -e "create database zabbix character set utf8 collate utf8_bin; grant all privileges on zabbix.* to {{ opts['zabbix.db_user'] }}@localhost identified by '{{ opts['zabbix.db_password'] }}'"
         - unless:
             - test -f /usr/share/doc/zabbix-server-mysql-*/create.sql
         - require:
-            - pkg: zabbix-server
+            - cmd: db-create
+
+db-create:
+    cmd.run:
+        - names:
+            - mysql -u root -e "create database zabbix character set utf8 collate utf8_bin; grant all privileges on zabbix.* to {{ opts['zabbix.db_user'] }}@localhost identified by '{{ opts['zabbix.db_password'] }}'"
+        - unless:
+            - echo "exit" | mysql -u root zabbix
+        - require:
+            - service: mariadb
 
 httpd:
     pkg.installed:
@@ -67,6 +90,6 @@ zabbix-repo:
 zabbix-delete-host:
     cmd.run:
         - name: salt-call zabbix.host_delete 10084 
-{#      - onlyif: salt-call zabbix.host_exists host='Zabbix server' #}
+{#        - onlyif: salt-call zabbix.host_exists host='Zabbix server' #}
         - require:
             - service: zabbix-server

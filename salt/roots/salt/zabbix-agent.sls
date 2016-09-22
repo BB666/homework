@@ -30,16 +30,17 @@ zabbix-agent-repo:
 {#
 zabbix-register-host:
     module.run:
-        - require:
-            - cmd: zabbix-agent
-            - cmd: zabbix-server-fake
         - name: zabbix.host_create
         - host: {{ hostname }}
         - groups: 2
         - interfaces: { type: 1, main: 1, useip: 1, ip: "{{ ip4 }}", dns: "", port: 10050 }
         - kwargs: { 
-            - templates: { templateid: 10001 }
+            templates: { templateid: 10001 }
         }
+        - unless: salt-call zabbix.host_exists {{ hostname }}
+        - require:
+            - cmd: zabbix-agent
+            - cmd: zabbix-server-fake
 #}
 {# module zabbix requires zabbix_server, creating empty file /usr/sbin/zabbix_server #}
 {#
@@ -48,8 +49,8 @@ zabbix-server-fake:
         - name: if [ ! -a /usr/sbin/zabbix_server ]; then touch /usr/sbin/zabbix_server; chmod 755 /usr/sbin/zabbix_server; fi
         - require:
             - cmd: zabbix-agent
-#}
 
+#}
 zabbix-register-host:
     cmd.run:
         - name: /usr/local/bin/zabbix-create-host
