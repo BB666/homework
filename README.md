@@ -11,7 +11,7 @@ https://github.com/bb666/homework
  - Applications and scripts to import Zabbix templates, autoregister Zabbix agents and to clog RabbitMQ queue to trigger Zabbix alarm
 
 ### Requirements:
-Project has been successfully tested on Windows host, perhaps will work on Linux machine as well. Internet connection and following software are required:
+Internet connection and following software are required:
  - Vagrant (tested with 1.8.5)
  - VirtualBox (tested with 5.1.6)
  - ssh, rsync (tested from CygWin 2.876)
