@@ -28,7 +28,7 @@ Vagrant.configure(2) do |config|
         main.vm.hostname = "central"
         # main.vm.network "forwarded_port", guest: 80, host: 8000
         # main.vm.network "public_network"
-        main.vm.network "private_network", ip: "192.168.56.100"
+        main.vm.network "private_network", ip: "192.168.56.101"
         main.vm.provider "virtualbox" do |v|
             v.name = "central"
             v.memory = 1024
@@ -84,7 +84,7 @@ Vagrant.configure(2) do |config|
         i = i + 1
         worker_name = "worker#{i}"
         worker_port = 8000 + i
-        worker_ip = 100 + i
+        worker_ip = 101 + i
 
         config.vm.define "#{worker_name}" do |main|
             main.vm.box = "centos/7"

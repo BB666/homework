@@ -23,7 +23,7 @@ Internet connection and following software are required:
 4. You may optionally change default configuration with your values and credentials (see below)
 
 ### Configuration:
-Start VirtualBox and configure two network adapters _NAT_ and _Host only_. _Host only_ adapter should be able to provide DHCP addresses for guests with IP range 192.168.56.100 to 192.168.56.250.
+Start VirtualBox and configure two network adapters _NAT_ and _Host only_. _Host only_ adapter should be able to provide DHCP addresses for guests with IP range 192.168.56.101 to 192.168.56.250.
 
 Number of initially deployed workers defined in `Vagrantfile` in variable WORKERS_COUNT. It can be from 0 and up to 150, depends on your host resources. The default value is 1:
 ```
@@ -35,8 +35,8 @@ Zabbix credentials and database password stored in `/salt/minion` file. The defa
 ```
     zabbix.user: Admin
     zabbix.password: zabbix
-    zabbix.server: 192.168.56.100
-    zabbix.url: http://192.168.56.100/zabbix/api_jsonrpc.php
+    zabbix.server: 192.168.56.101
+    zabbix.url: http://192.168.56.101/zabbix/api_jsonrpc.php
     zabbix.db_user: zabbix
     zabbix.db_password: password
 ```
@@ -72,10 +72,10 @@ To clog RabbitMQ queue and trigger alarm on Zabbix server run `/usr/local/bin/cl
 [vagrant@central ~]$ clog
 Trying to clog the queue for 60 seconds - 5%
 ```
-You can check status and clear queue `central` with RabbitMQ web interface http://192.168.56.100:15672/#/queues
+You can check status and clear queue `central` with RabbitMQ web interface http://192.168.56.101:15672/#/queues
 Login and password for RabbitMQ console: guest/guest
 
-Deployed machines automatically registers with Zabbix server and can be monitored with Zabbix web console. Also you can check RabbitMQ queue depth and alarm status at Zabbix dashboard http://192.168.56.100/zabbix/zabbix.php?action=dashboard.view
+Deployed machines automatically registers with Zabbix server and can be monitored with Zabbix web console. Also you can check RabbitMQ queue depth and alarm status at Zabbix dashboard http://192.168.56.101/zabbix/zabbix.php?action=dashboard.view
 Login and password for Zabbix: Admin/zabbix
 
 On each worker available Python script `/usr/local/bin/app-client`, which can be started to constantly consume messages from RabbitMQ server queue.
@@ -88,8 +88,8 @@ On each worker available Python script `/usr/local/bin/app-client`, which can be
 For stress test you can deploy abnormally high number of workers and start `/usr/local/bin/app-client` on each of them to consume messages. Then run `/usr/local/bin/clog` on central and check queue depth, queue alarm and health status of each machine with Zabbix dashboard. Number of workers can be adjusted according to your host CPU and memory resources. 
 
 ### Notes:
-* RabbitMQ Web Management console available at http://192.168.56.100:15672 with login/password: `guest/guest`
-* Zabbix Web Management available at http://192.168.56.100/zabbix with login/password: `Admin/zabbix`
+* RabbitMQ Web Management console available at http://192.168.56.101:15672 with login/password: `guest/guest`
+* Zabbix Web Management available at http://192.168.56.101/zabbix with login/password: `Admin/zabbix`
 * Known bug with authentication failure for Vagrant 1.8.5 (incorrect permissions for guest authorized_keys file), more info https://github.com/mitchellh/vagrant/issues/7610
   Following quick fix :
 ``` diff
