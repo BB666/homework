@@ -30,7 +30,7 @@ def read(queue_object):
 
 parameters = pika.ConnectionParameters()
 cc = protocol.ClientCreator(reactor, twisted_connection.TwistedProtocolConnection, parameters)
-d = cc.connectTCP('192.168.56.101', 5672)
+d = cc.connectTCP('central', 5672)
 d.addCallback(lambda protocol: protocol.ready)
 d.addCallback(run)
 print(" [*] Waiting for messages. To exit press CTRL+C")

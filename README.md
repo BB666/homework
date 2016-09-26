@@ -11,7 +11,7 @@ https://github.com/imakejevs/homework
  - Sample Java application, Bash and Python scripts
 
 ### Details:
-Vagrant depoys one `central` machine and up to 150 `workers`, number of `workers` customizable via variable in Vagrantfile. On `central` Salt minion installs and configure Zabbix server, Zabbix agent, RabbitMQ server with one query `central` and builds sample Java class from source. On each `worker` Salt minion install Zabbix agent register it with Zabbix server.
+Vagrant deploys one `central` machine and up to 150 `workers`, number of `workers` customizable via variable in Vagrantfile. On `central` Salt minion installs and configure Zabbix server, Zabbix agent, RabbitMQ server with one query `central` and builds sample Java class from source. On each `worker` Salt minion install Zabbix agent register it with Zabbix server.
 All deployment and configuration processes are fully automated without any questions during deployment.
 
 ### Requirements:
@@ -39,8 +39,7 @@ Zabbix credentials and database password stored in `/salt/minion` file. The defa
 ```
     zabbix.user: Admin
     zabbix.password: zabbix
-    zabbix.server: 192.168.56.101
-    zabbix.url: http://192.168.56.101/zabbix/api_jsonrpc.php
+    zabbix.server: central
     zabbix.db_user: zabbix
     zabbix.db_password: password
 ```
@@ -63,7 +62,9 @@ worker2
 ...
 worker150
 ```
-There are number of scripts in `/usr/local/bin`. Java application gets compiled during deployment from `/usr/src/Send.java` to `/usr/src/Send.class`. This application takes one parameter from command line and sends it to AMQP queue.
+You can add them with corresponding IP addresses to your hosts file or DNS server.
+
+Some sample scripts available in `/usr/local/bin`. Java application gets compiled during deployment from `/usr/src/Send.java` to `/usr/src/Send.class`. This application takes one parameter from command line and sends it to AMQP queue.
 
 To send message to RabbitMQ queue use `/usr/local/bin/app-server <message>` where <message> is a number:
 ```
@@ -76,10 +77,10 @@ To clog RabbitMQ queue and trigger alarm on Zabbix server run `/usr/local/bin/cl
 [vagrant@central ~]$ clog
 Trying to clog the queue for 60 seconds - 5%
 ```
-You can check status and clear queue `central` with RabbitMQ web interface http://192.168.56.101:15672/#/queues
+You can check status and clear queue `central` with RabbitMQ web interface http://central:15672/#/queues
 Login and password for RabbitMQ console: guest/guest
 
-Deployed machines auto registers with Zabbix server and can be monitored with Zabbix web console. Also you can check RabbitMQ queue depth and alarm status at Zabbix dashboard http://192.168.56.101/zabbix/zabbix.php?action=dashboard.view
+Deployed machines auto registers with Zabbix server and can be monitored with Zabbix web console. Also you can check RabbitMQ queue depth and alarm status at Zabbix dashboard http://central/zabbix/zabbix.php?action=dashboard.view
 Login and password for Zabbix: Admin/zabbix
 
 On each worker available Python script `/usr/local/bin/app-client`, which can be started to constantly consume messages from RabbitMQ server queue.
@@ -92,8 +93,8 @@ On each worker available Python script `/usr/local/bin/app-client`, which can be
 For stress test you can deploy abnormally high number of workers and start `/usr/local/bin/app-client` on each of them to consume messages. Then run `/usr/local/bin/clog` on central and check queue depth, queue alarm and health status of each machine with Zabbix dashboard. Number of workers can be adjusted according to your host CPU and memory resources. 
 
 ### Notes:
-* RabbitMQ Web Management console available at http://192.168.56.101:15672 with login/password: `guest/guest`
-* Zabbix Web Management available at http://192.168.56.101/zabbix with login/password: `Admin/zabbix`
+* RabbitMQ Web Management console available at http://central:15672 with login/password: `guest/guest`
+* Zabbix Web Management available at http://central/zabbix with login/password: `Admin/zabbix`
 * Known bug with authentication failure for Vagrant 1.8.5 (incorrect permissions for guest authorized_keys file), more info https://github.com/mitchellh/vagrant/issues/7610
   Following quick fix :
 ``` diff

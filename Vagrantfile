@@ -5,7 +5,7 @@
 WORKERS_COUNT = 1
 
 ### Check for required plugins
-required_plugins = %w( virtualbox vagrant-vbguest )
+required_plugins = %w( virtualbox vagrant-vbguest vagrant-hosts )
 logger = Vagrant::UI::Colored.new
 result = false
 required_plugins.each do |plugin|
@@ -35,6 +35,9 @@ Vagrant.configure(2) do |config|
             v.cpus = 2
             v.linked_clone = true
         end
+
+        # Update hosts file
+        main.vm.provision :hosts, sync_hosts: true
 
         # RabbitMQ server configuration file
         main.vm.provision :file, source: "etc/rabbitmq/rabbitmq.config", destination: "/tmp/rabbitmq.config"
@@ -99,6 +102,9 @@ Vagrant.configure(2) do |config|
                 v.cpus = 2
                 v.linked_clone = true
             end
+
+            # Update hosts file
+            main.vm.provision :hosts, sync_hosts: true
 
             # Application to deploy on WORKERS
             main.vm.provision :file, source: "usr/local/bin/app-client", destination: "/tmp/app-client"

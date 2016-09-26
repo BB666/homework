@@ -1,9 +1,9 @@
-zabbix.server: 192.168.56.101
+zabbix.server: central
 zabbix.user: Admin
 zabbix.password: zabbix
-zabbix.url: http://192.168.56.101/zabbix/api_jsonrpc.php
 zabbix.db_user: zabbix
 zabbix.db_password: password
+zabbix.url: http://{{ opts['zabbix.server'] }}/zabbix/api_jsonrpc.php
 file_client: local
 file_roots:
   base:

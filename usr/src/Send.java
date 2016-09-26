@@ -10,7 +10,7 @@ public class Send {
 
     public static void main(String[] args) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
+        factory.setHost("central");
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 //      channel.queueDeclare(QUEUE_NAME, false, false, false, null);
